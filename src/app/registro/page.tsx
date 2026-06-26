@@ -1,15 +1,31 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+'use client';
+
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const initSupabase = async () => {
+      const { createClient } = await import('@supabase/supabase-js');
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      setSupabase(client);
+    };
+    initSupabase();
+  }, []);
 
   const handleSignUp = async () => {
+    if (!supabase) return;
+    setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -17,6 +33,7 @@ export default function RegisterPage() {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
     });
+    setLoading(false);
     if (!error) {
       alert('Revisa tu correo para confirmar tu registro!');
       router.push('/login');
@@ -54,9 +71,10 @@ export default function RegisterPage() {
         </div>
         <button
           onClick={handleSignUp}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          disabled={loading || !supabase}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
         >
-          Registrarse
+          {loading ? 'Cargando...' : 'Registrarse'}
         </button>
         <p className="text-center text-gray-600 mt-4">
           ¿Ya tienes cuenta?{' '}

@@ -1,19 +1,36 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+'use client';
+
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const initSupabase = async () => {
+      const { createClient } = await import('@supabase/supabase-js');
+      const client = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      setSupabase(client);
+    };
+    initSupabase();
+  }, []);
 
   const handleSignIn = async () => {
+    if (!supabase) return;
+    setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    setLoading(false);
     if (!error) {
       router.push('/dashboard');
     } else {
@@ -50,9 +67,10 @@ export default function LoginPage() {
         </div>
         <button
           onClick={handleSignIn}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          disabled={loading || !supabase}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
         >
-          Iniciar Sesión
+          {loading ? 'Cargando...' : 'Iniciar Sesión'}
         </button>
         <p className="text-center text-gray-600 mt-4">
           ¿No tienes cuenta?{' '}
