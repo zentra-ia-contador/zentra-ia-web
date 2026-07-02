@@ -1,0 +1,21 @@
+{
+  "name": "zentra-railway-scraper",
+  "version": "1.0.0",
+  "description": "Scraper SRI para ZENTRA IA en Railway",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^133.0.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.5.0",
+    "p-queue": "7.4.1",
+    "puppeteer-core": "^24.4.0"
+  }
+}
